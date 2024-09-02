@@ -48,7 +48,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete }) => {
     }, [displayedText, page, isTyping]);
 
     const nextPage = () => {
-        if (!isTyping && (page + 1) * SENTENCES_PER_PAGE < displayedText.length) {
+        if ((page + 1) * SENTENCES_PER_PAGE < displayedText.length) {
             setPage((prev) => prev + 1);
             setCurrentText('');
             setIsTyping(true);
