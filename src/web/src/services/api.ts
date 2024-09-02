@@ -12,6 +12,7 @@ interface StoryResponse {
     chat_id: string;
     story: string;
     memories: string[];
+    is_story_ended: boolean;
 }
 
 export const initGame = async (): Promise<InitResponse> => {

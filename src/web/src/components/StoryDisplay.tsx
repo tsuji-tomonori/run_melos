@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 interface StoryDisplayProps {
     story: string;
     onComplete: () => void; // すべてのページが表示された後のコールバック
+    isStoryEnded: boolean; // 物語が完結したかどうかを示すフラグ
 }
 
-const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete }) => {
+const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryEnded }) => {
     const [displayedText, setDisplayedText] = useState<string[]>([]);
     const [page, setPage] = useState<number>(0);
     const [currentText, setCurrentText] = useState<string>('');
@@ -18,11 +19,17 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete }) => {
         const sentences = story.split(/(?<=。(?!」))|(?<=。」)/g)
             .filter(Boolean)
             .map(sentence => sentence.trim());
+
+        // 物語が完結している場合、「完」を最後に追加
+        if (isStoryEnded) {
+            sentences.push('完');
+        }
+
         setDisplayedText(sentences);
         setPage(0); // ストーリーが更新されたらページをリセット
         setCurrentText(''); // 現在のテキストもリセット
         setIsTyping(true); // タイピング状態をリセット
-    }, [story]);
+    }, [story, isStoryEnded]);
 
     useEffect(() => {
         // タイプライター風アニメーションの実装
