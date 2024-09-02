@@ -108,7 +108,7 @@ def now_epoch_ms() -> int:
 
 
 def to_isoformat(epoch_ms: int) -> str:
-    return datetime.datetime.fromtimestamp(epoch_ms / 1000).isoformat()
+    return f"{datetime.datetime.fromtimestamp(epoch_ms / 1000).isoformat()}Z"
 
 
 def put_story(
@@ -126,7 +126,7 @@ def put_story(
             "story": story,
             "memories": memories,
             "timestamp": to_isoformat(now),
-            env.TTL_KEY: now_epoch_ms() + int(env.TTL_SECONDS),
+            env.TTL_KEY: now_epoch_sec() + int(env.TTL_SECONDS),
         },
     )
 
