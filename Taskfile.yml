@@ -14,3 +14,6 @@ tasks:
     dir: src/web
     cmds:
       - npm start
+  mfa:
+    cmds:
+      - aws-mfa
