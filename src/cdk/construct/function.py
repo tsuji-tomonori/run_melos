@@ -19,7 +19,7 @@ CORS = {
 
 TTL = {
     "TTL_KEY": TTL_KEY,
-    "TTL_SECONDS": "3600,",
+    "TTL_SECONDS": "3600",
 }
 
 
