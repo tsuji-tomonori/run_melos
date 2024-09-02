@@ -1,0 +1,16 @@
+version: "3"
+
+env:
+  AWS_PROFILE: "admin"
+
+tasks:
+  init:
+    cmds:
+      - pip install -r requirements-dev.txt
+  deploy:
+    cmds:
+      - cdk deploy
+  web:
+    dir: src/web
+    cmds:
+      - npm start
