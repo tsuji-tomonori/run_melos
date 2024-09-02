@@ -19,6 +19,8 @@ class Environ(NamedTuple):
     ACCESS_CONTROL_ALLOW_HEADERS: str
     ACCESS_CONTROL_ALLOW_METHODS: str
     ACCESS_CONTROL_ALLOW_ORIGIN: str
+    TTL_SECONDS: str
+    TTL_KEY: str
 
     @classmethod
     def from_env(cls: type[Environ]) -> Environ:
@@ -47,6 +49,10 @@ def obtain_init_memories(env: Environ) -> list[str]:
     return res["value"]  # type: ignore  # noqa: PGH003
 
 
+def now_epoch_sec() -> int:
+    return int(time.time())
+
+
 def now_epoch_ms() -> int:
     return int(time.time() * 1000)
 
@@ -70,6 +76,7 @@ def put_story(
             "story": story,
             "memories": memories,
             "timestamp": to_isoformat(now),
+            env.TTL_KEY: now_epoch_ms() + int(env.TTL_SECONDS),
         },
     )
 

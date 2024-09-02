@@ -4,6 +4,8 @@ import aws_cdk as cdk
 from aws_cdk import aws_dynamodb as dynamdb
 from constructs import Construct
 
+TTL_KEY = "ttl_key"
+
 
 class DynamoDBConstruct(Construct):
     def __init__(
@@ -27,6 +29,7 @@ class DynamoDBConstruct(Construct):
             ),
             billing_mode=dynamdb.BillingMode.PAY_PER_REQUEST,
             removal_policy=cdk.RemovalPolicy.DESTROY,
+            time_to_live_attribute=TTL_KEY,
         )
 
         self.story_history = dynamdb.Table(
@@ -42,4 +45,5 @@ class DynamoDBConstruct(Construct):
             ),
             billing_mode=dynamdb.BillingMode.PAY_PER_REQUEST,
             removal_policy=cdk.RemovalPolicy.DESTROY,
+            time_to_live_attribute=TTL_KEY,
         )

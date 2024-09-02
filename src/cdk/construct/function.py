@@ -6,6 +6,8 @@ from aws_cdk import aws_lambda as lambda_
 from aws_cdk import aws_logs as logs
 from constructs import Construct
 
+from src.cdk.construct.table import TTL_KEY
+
 CORS = {
     "ACCESS_CONTROL_ALLOW_HEADERS": (
         "Content-Type,X-Amz-Date,Authorization,\
@@ -13,6 +15,11 @@ CORS = {
     ),
     "ACCESS_CONTROL_ALLOW_METHODS": "*",
     "ACCESS_CONTROL_ALLOW_ORIGIN": "*",
+}
+
+TTL = {
+    "TTL_KEY": TTL_KEY,
+    "TTL_SECONDS": "3600,",
 }
 
 
@@ -38,7 +45,7 @@ class FunctionConstruct(Construct):
             application_log_level_v2=lambda_.ApplicationLogLevel.INFO,
             memory_size=512,
             timeout=cdk.Duration.seconds(30),
-            environment=CORS,
+            environment=CORS | TTL,
         )
 
         self.logs = logs.LogGroup(
