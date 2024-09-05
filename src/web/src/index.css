@@ -96,3 +96,24 @@ button:hover {
 .pagination-buttons button:hover {
     background-color: #0056b3;
 }
+
+.start-game-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    /* 初期色 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.start-game-button.active {
+    background-color: #0056b3;
+    /* ボタンが押された後の色 */
+}
+
+.start-game-button:hover {
+    background-color: #0056b3;
+}
