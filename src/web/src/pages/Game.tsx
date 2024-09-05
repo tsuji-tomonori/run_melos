@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { fetchStory } from '../services/api';
 import StoryDisplay from '../components/StoryDisplay';
 import MemoryButton from '../components/MemoryButton';
+import LoadingSpinner from '../components/LoadingSpinner';
+import HomeButton from '../components/HomeButton';
 
 interface LocationState {
     story: string;
@@ -11,7 +13,6 @@ interface LocationState {
 
 const Game: React.FC = () => {
     const location = useLocation();
-    const navigate = useNavigate();
     const { story: initialStory, memories: initialMemories } = location.state as LocationState;
     const [story, setStory] = useState<string>(initialStory);
     const [memories, setMemories] = useState<string[]>(initialMemories);
@@ -61,9 +62,7 @@ const Game: React.FC = () => {
         <div className="game">
             <StoryDisplay story={story} onComplete={handleComplete} isStoryEnded={isStoryEnded} />
             {isStoryEnded && storyCompleted && ( // 物語が終了し、すべての物語が表示された後にのみ表示
-                <div>
-                    <button onClick={() => navigate('/')}>Homeへ戻る</button>
-                </div>
+                <HomeButton />
             )}
             {!isStoryEnded && showMemoryButtons && storyCompleted && (
                 <div className="memories">
@@ -78,7 +77,7 @@ const Game: React.FC = () => {
                 </div>
             )}
             {isLoading ? (
-                <div className="loading-spinner">Loading...</div>
+                <LoadingSpinner />
             ) : (
                 !isStoryEnded && showMemoryButtons && storyCompleted && <button className="confirm-button" onClick={confirmMemories}>決定</button>
             )}
