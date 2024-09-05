@@ -60,7 +60,7 @@ const Game: React.FC = () => {
     return (
         <div className="game">
             <StoryDisplay story={story} onComplete={handleComplete} isStoryEnded={isStoryEnded} />
-            {isStoryEnded && (
+            {isStoryEnded && storyCompleted && ( // 物語が終了し、すべての物語が表示された後にのみ表示
                 <div>
                     <button onClick={() => navigate('/')}>Homeへ戻る</button>
                 </div>
