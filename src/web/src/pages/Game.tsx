@@ -19,6 +19,7 @@ const Game: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showMemoryButtons, setShowMemoryButtons] = useState<boolean>(false);
     const [isStoryEnded, setIsStoryEnded] = useState<boolean>(false); // 物語の完結を管理するステート
+    const [storyCompleted, setStoryCompleted] = useState<boolean>(false); // 物語の表示が完了したかどうかを示すステート
 
     const toggleMemory = (memory: string) => {
         if (selectedMemories.includes(memory)) {
@@ -35,7 +36,8 @@ const Game: React.FC = () => {
         }
 
         setIsLoading(true);
-        setShowMemoryButtons(false);
+        setShowMemoryButtons(false); // 新しいストーリーを表示するので、記憶ボタンを非表示
+        setStoryCompleted(false); // 新しいストーリーを表示するので、完了状態をリセット
 
         try {
             const data = await fetchStory(location.pathname.split('/')[2], selectedMemories);
@@ -43,13 +45,13 @@ const Game: React.FC = () => {
             setMemories(data.memories);
             setSelectedMemories([]);
             setIsStoryEnded(data.is_story_ended); // ストーリーが終了したかどうかを設定
-            handleComplete(); // ストーリーが更新された後にhandleCompleteを呼び出して初期化
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleComplete = () => {
+        setStoryCompleted(true); // 物語の表示が完了したときに完了状態に設定
         if (!isStoryEnded) {
             setShowMemoryButtons(true);  // 物語が完結していない場合のみ記憶ボタンを表示する
         }
@@ -63,7 +65,7 @@ const Game: React.FC = () => {
                     <button onClick={() => navigate('/')}>Homeへ戻る</button>
                 </div>
             )}
-            {!isStoryEnded && showMemoryButtons && (
+            {!isStoryEnded && showMemoryButtons && storyCompleted && (
                 <div className="memories">
                     {memories.map((memory) => (
                         <MemoryButton
@@ -78,7 +80,7 @@ const Game: React.FC = () => {
             {isLoading ? (
                 <div className="loading-spinner">Loading...</div>
             ) : (
-                !isStoryEnded && showMemoryButtons && <button className="confirm-button" onClick={confirmMemories}>決定</button>
+                !isStoryEnded && showMemoryButtons && storyCompleted && <button className="confirm-button" onClick={confirmMemories}>決定</button>
             )}
         </div>
     );
