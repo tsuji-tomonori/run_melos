@@ -79,6 +79,17 @@ def obtain_model_id(env: Environ) -> str:
     return res["value"]  # type: ignore  # noqa: PGH003
 
 
+def obtain_output_format(env: Environ) -> str:
+    table = boto3.resource("dynamodb").Table(env.MASTER_TABLE)
+    res = table.get_item(
+        Key={
+            "command": "output_format",
+            "version": "latest",
+        },
+    ).get("Item")
+    return res["value"]  # type: ignore  # noqa: PGH003
+
+
 def retrieve_story_history(chat_id: str, env: Environ) -> str:
     table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
     res = table.query(KeyConditionExpression=Key("chat_id").eq(chat_id))
@@ -86,7 +97,7 @@ def retrieve_story_history(chat_id: str, env: Environ) -> str:
         res["Items"],  # type: ignore  # noqa: PGH003
         key=itemgetter("epoch_ms"),
     )
-    return "\n".join(x["story"] for x in sorted_items)
+    return "\n---".join(x["story"] for x in sorted_items)
 
 
 def retrieve_memories(chat_id: str, env: Environ) -> list[str]:
@@ -155,7 +166,7 @@ def generate_story_and_choices(
         current_story=retrieve_story_history(chat_id, env),
         memory=", ".join(memories),
     )
-
+    formatted_prompt += obtain_output_format(env)
     prompt_params = obtain_prompt_param(env)
     prompt_params |= {
         "messages": [
