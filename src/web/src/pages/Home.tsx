@@ -13,7 +13,8 @@ const Home: React.FC = () => {
         setIsGameStarted(true); // ボタンの色を変えるためにステートを更新
         try {
             const data = await initGame();
-            navigate(`/game/${data.chat_id}`, { state: { story: data.story, memories: data.memories } });
+            // epoch_msもstateとして渡す
+            navigate(`/game/${data.chat_id}`, { state: { story: data.story, memories: data.memories, epoch_ms: data.epoch_ms } });
         } finally {
             setIsLoading(false); // API呼び出し完了後にローディング表示を停止
         }
@@ -22,7 +23,11 @@ const Home: React.FC = () => {
     return (
         <div className="home">
             <h1>3つまでしか記憶が残らない走れメロス</h1>
-            <p>ゲームのあらすじ...</p>
+            <p>
+                プレイヤーであるあなたはメロスになり切り、太宰治による短編小説「走れメロス」の物語を進めていきます。
+                ただし、覚えておける内容は3つまで。
+                果たしてメロスは無事にセリヌンティウスを救えるのか?
+            </p>
             {isLoading ? (
                 <LoadingSpinner />
             ) : (

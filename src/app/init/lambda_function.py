@@ -66,16 +66,16 @@ def put_story(
     memories: list[str],
     chat_id: str,
     env: Environ,
+    epoch_ms: int,
 ) -> None:
     table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
-    now = now_epoch_ms()
     table.put_item(
         Item={
             "chat_id": chat_id,
-            "epoch_ms": now,
+            "epoch_ms": epoch_ms,
             "story": story,
             "memories": memories,
-            "timestamp": to_isoformat(now),
+            "timestamp": to_isoformat(epoch_ms),
             env.TTL_KEY: now_epoch_sec() + int(env.TTL_SECONDS),
         },
     )
@@ -85,27 +85,31 @@ def create_chat_id() -> str:
     return f"{uuid.uuid4()}-{now_epoch_ms()}"
 
 
-class InitStory(NamedTuple):
+class Story(NamedTuple):
     chat_id: str
     story: str
-    memories: list[str]
+    memories: dict[int, str]
+    epoch_ms: int
 
     @classmethod
-    def from_db(cls: type[InitStory], env: Environ) -> InitStory:
-        return InitStory(
+    def from_db(cls: type[Story], env: Environ) -> Story:
+        memories = obtain_init_memories(env)
+        return Story(
             chat_id=create_chat_id(),
             story=obtain_init_story(env),
-            memories=obtain_init_memories(env),
+            memories={str(i): v for i, v in enumerate(memories)},
+            epoch_ms=now_epoch_ms(),
         )
 
 
-def service(env: Environ) -> InitStory:
-    result = InitStory.from_db(env)
+def service(env: Environ) -> Story:
+    result = Story.from_db(env)
     put_story(
         story=result.story,
         memories=result.memories,
         chat_id=result.chat_id,
         env=env,
+        epoch_ms=result.epoch_ms,
     )
     return result
 

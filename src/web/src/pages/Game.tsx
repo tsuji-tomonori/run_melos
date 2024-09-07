@@ -8,25 +8,29 @@ import HomeButton from '../components/HomeButton';
 
 interface LocationState {
     story: string;
-    memories: string[];
+    memories: { [index: number]: string };
+    epoch_ms: number;
 }
 
 const Game: React.FC = () => {
     const location = useLocation();
-    const { story: initialStory, memories: initialMemories } = location.state as LocationState;
+
+    const { story: initialStory, memories: initialMemories, epoch_ms: initialEpochMs } = location.state as LocationState;
     const [story, setStory] = useState<string>(initialStory);
-    const [memories, setMemories] = useState<string[]>(initialMemories);
+    const [memories, setMemories] = useState<{ [index: string]: string }>(initialMemories);
     const [selectedMemories, setSelectedMemories] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [showMemoryButtons, setShowMemoryButtons] = useState<boolean>(false);
     const [isStoryEnded, setIsStoryEnded] = useState<boolean>(false); // 物語の完結を管理するステート
     const [storyCompleted, setStoryCompleted] = useState<boolean>(false); // 物語の表示が完了したかどうかを示すステート
+    const [epochMs, setEpochMs] = useState<number>(initialEpochMs);
 
-    const toggleMemory = (memory: string) => {
-        if (selectedMemories.includes(memory)) {
-            setSelectedMemories(selectedMemories.filter((m) => m !== memory));
+    // 記憶のインデックスを選択する処理
+    const toggleMemory = (index: string) => {
+        if (selectedMemories.includes(index)) {
+            setSelectedMemories(selectedMemories.filter((i) => i !== index));
         } else if (selectedMemories.length < 3) {
-            setSelectedMemories([...selectedMemories, memory]);
+            setSelectedMemories([...selectedMemories, index]);
         }
     };
 
@@ -41,11 +45,12 @@ const Game: React.FC = () => {
         setStoryCompleted(false); // 新しいストーリーを表示するので、完了状態をリセット
 
         try {
-            const data = await fetchStory(location.pathname.split('/')[2], selectedMemories);
+            const data = await fetchStory(location.pathname.split('/')[2], selectedMemories, epochMs); // memoriesはnumber[]
             setStory(data.story);
             setMemories(data.memories);
             setSelectedMemories([]);
             setIsStoryEnded(data.is_story_ended); // ストーリーが終了したかどうかを設定
+            setEpochMs(data.epoch_ms); // 新しいepoch_msを更新
         } finally {
             setIsLoading(false);
         }
@@ -66,12 +71,12 @@ const Game: React.FC = () => {
             )}
             {!isStoryEnded && showMemoryButtons && storyCompleted && (
                 <div className="memories">
-                    {memories.map((memory) => (
+                    {Object.entries(memories).map(([index, memory]) => (
                         <MemoryButton
-                            key={memory}
+                            key={index}
                             memory={memory}
-                            isActive={selectedMemories.includes(memory)}
-                            toggleMemory={toggleMemory}
+                            isActive={selectedMemories.includes(index)}
+                            toggleMemory={() => toggleMemory(index)}
                         />
                     ))}
                 </div>

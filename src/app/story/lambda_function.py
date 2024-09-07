@@ -90,6 +90,17 @@ def obtain_output_format(env: Environ) -> str:
     return res["value"]  # type: ignore  # noqa: PGH003
 
 
+def obtain_memories(env: Environ, chat_id: str, epoch_ms: int) -> str:
+    table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
+    res = table.get_item(
+        Key={
+            "chat_id": chat_id,
+            "epoch_ms": epoch_ms,
+        },
+    ).get("Item")
+    return res["memories"]  # type: ignore  # noqa: PGH003
+
+
 def retrieve_story_history(chat_id: str, env: Environ) -> str:
     table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
     res = table.query(KeyConditionExpression=Key("chat_id").eq(chat_id))
@@ -98,16 +109,6 @@ def retrieve_story_history(chat_id: str, env: Environ) -> str:
         key=itemgetter("epoch_ms"),
     )
     return "\n---".join(x["story"] for x in sorted_items)
-
-
-def retrieve_memories(chat_id: str, env: Environ) -> list[str]:
-    table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
-    res = table.query(KeyConditionExpression=Key("chat_id").eq(chat_id))
-    sorted_items: list[dict[str, list[str]]] = sorted(
-        res["Items"],  # type: ignore  # noqa: PGH003
-        key=itemgetter("epoch_ms"),
-    )
-    return sorted_items[-1]["memories"]
 
 
 def now_epoch_sec() -> int:
@@ -124,19 +125,19 @@ def to_isoformat(epoch_ms: int) -> str:
 
 def put_story(
     story: str,
-    memories: list[str],
+    memories: dict[int, str],
     chat_id: str,
     env: Environ,
+    epoch_ms: int,
 ) -> None:
     table = boto3.resource("dynamodb").Table(env.STORY_HISTORY_TABLE)
-    now = now_epoch_ms()
     table.put_item(
         Item={
             "chat_id": chat_id,
-            "epoch_ms": now,
+            "epoch_ms": epoch_ms,
             "story": story,
             "memories": memories,
-            "timestamp": to_isoformat(now),
+            "timestamp": to_isoformat(epoch_ms),
             env.TTL_KEY: now_epoch_sec() + int(env.TTL_SECONDS),
         },
     )
@@ -157,14 +158,16 @@ class AiResponse(NamedTuple):
 
 def generate_story_and_choices(
     chat_id: str,
-    memories: list[str],
+    memories_index: list[int],
     env: Environ,
+    before_epoch_ms: int,
 ) -> AiResponse:
     client = boto3.client("bedrock-runtime")
     prompt_text = obtain_prompt_text(env)
+    memories_map = obtain_memories(env, chat_id, before_epoch_ms)
     formatted_prompt = prompt_text.format(
         current_story=retrieve_story_history(chat_id, env),
-        memory=", ".join(memories),
+        memory=", ".join(memories_map[i] for i in memories_index),
     )
     formatted_prompt += obtain_output_format(env)
     prompt_params = obtain_prompt_param(env)
@@ -176,6 +179,7 @@ def generate_story_and_choices(
             },
         ],
     }
+    logger.info(prompt_params)
 
     for loop_num in range(obtain_loop_num(env)):
         try:
@@ -189,6 +193,7 @@ def generate_story_and_choices(
                 0
             ]["text"]
             result = json.loads(generated_text)
+            memories = list(memories_map.values())
             return AiResponse(
                 story=result["story_continuation"],
                 is_story_ended=result["is_story_ended"],
@@ -204,41 +209,49 @@ def generate_story_and_choices(
 class Story(NamedTuple):
     chat_id: str
     story: str
-    memories: list[str]
+    memories: dict[int, str]
     is_story_ended: bool
+    epoch_ms: int
 
     @classmethod
     def from_db(
         cls: type[Story],
         env: Environ,
         chat_id: str,
+        epoch_ms: int,
         memories: list[str],
     ) -> Story:
         res = generate_story_and_choices(
             chat_id=chat_id,
-            memories=memories,
+            memories_index=memories,
             env=env,
+            before_epoch_ms=epoch_ms,
         )
         return Story(
             chat_id=chat_id,
             story=res.story,
-            memories=res.memories,
+            memories={str(i): v for i, v in enumerate(res.memories)},
             is_story_ended=res.is_story_ended,
+            epoch_ms=now_epoch_ms(),
         )
 
 
 def service(env: Environ, event: dict) -> Story:
     chat_id = event["pathParameters"]["chat-id"]
+    body = json.loads(event["body"])
+    logger.info(body)
     result = Story.from_db(
         env=env,
         chat_id=urllib.parse.unquote(chat_id),
-        memories=json.loads(event["body"])["memories"],
+        memories=body["memories"],
+        epoch_ms=body["epoch_ms"],
     )
     put_story(
         story=result.story,
         memories=result.memories,
         chat_id=result.chat_id,
         env=env,
+        epoch_ms=result.epoch_ms,
     )
     return result
 
