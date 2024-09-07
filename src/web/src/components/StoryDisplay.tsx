@@ -49,20 +49,19 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
     const [currentText, setCurrentText] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(true);
 
-    const SENTENCES_PER_PAGE = 5;  // 1ページあたりの文数
+    // --- で区切るための文字列
+    const PAGE_BREAK = '---';
 
     useEffect(() => {
-        // 文章を「。」で分割し、「。」の後に「」」がある場合、その「」」を含める
-        const sentences = story.split(/(?<=。(?!」))|(?<=。」)/g)
-            .filter(Boolean)
-            .map(sentence => sentence.trim());
+        // 物語を "---" で分割し、各セクションをページに対応させる
+        const sections = story.split(PAGE_BREAK).map(section => section.trim());
 
         // 物語が完結している場合、「完」を最後に追加
         if (isStoryEnded) {
-            sentences.push('完');
+            sections.push('完');
         }
 
-        setDisplayedText(sentences);
+        setDisplayedText(sections);
         setPage(0); // ストーリーが更新されたらページをリセット
         setCurrentText(''); // 現在のテキストもリセット
         setIsTyping(true); // タイピング状態をリセット
@@ -72,16 +71,16 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
         // タイプライター風アニメーションの実装
         if (isTyping && displayedText.length > 0) {
             let index = -1; // 0からだとなぜか2文字目から取得されたため
-            const currentSentences = displayedText.slice(page * SENTENCES_PER_PAGE, (page + 1) * SENTENCES_PER_PAGE).join('');
+            const currentSection = displayedText[page];
             const interval = setInterval(() => {
-                if (index + 1 < currentSentences.length) {
+                if (index + 1 < currentSection.length) {
                     index++;
-                    setCurrentText((prev) => prev + currentSentences[index]);
+                    setCurrentText((prev) => prev + currentSection[index]);
                 } else {
                     setIsTyping(false);
                     clearInterval(interval);
                     // 全文表示が完了したときにコールバックを呼び出す
-                    if ((page + 1) * SENTENCES_PER_PAGE >= displayedText.length) {
+                    if (page + 1 >= displayedText.length) {
                         onComplete();
                     }
                 }
@@ -92,7 +91,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
     }, [displayedText, page, isTyping]);
 
     const nextPage = () => {
-        if ((page + 1) * SENTENCES_PER_PAGE < displayedText.length) {
+        if (page + 1 < displayedText.length) {
             setPage((prev) => prev + 1);
             setCurrentText('');
             setIsTyping(true);
@@ -114,7 +113,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
             <p>{convertRubyText(currentText)}</p> {/* ここでルビを表示 */}
             <div className="pagination-buttons">
                 {page > 0 && <button onClick={prevPage} style={{ marginRight: 'auto' }}>戻る</button>}
-                {((page + 1) * SENTENCES_PER_PAGE < displayedText.length || isTyping) && (
+                {(page + 1 < displayedText.length || isTyping) && (
                     <button style={{ marginLeft: 'auto' }} onClick={nextPage}>次へ</button>
                 )}
             </div>
