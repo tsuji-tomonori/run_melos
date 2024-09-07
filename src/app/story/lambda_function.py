@@ -192,7 +192,7 @@ def generate_story_and_choices(
             return AiResponse(
                 story=result["story_continuation"],
                 is_story_ended=result["is_story_ended"],
-                memories=result.get("new_memories", []) + memories,
+                memories=list(set(result.get("new_memories", []) + memories)),
             )
         except Exception as e:
             logger.exception("generate story error")
