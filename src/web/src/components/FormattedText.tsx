@@ -43,13 +43,15 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text }) => {
         return parts;
     };
 
-    // 改行の処理（単純に改行コードが存在する場合の処理）
-    const textWithRuby = convertRubyText(text);
-
+    // 改行コード \n を <br /> に変換して、ルビ付きテキストと一緒に処理
     return (
         <>
-            {textWithRuby}
-            <br /> {/* 1行ごとに改行を追加 */}
+            {text.split('\n').map((line, index) => (
+                <React.Fragment key={index}>
+                    {convertRubyText(line)}
+                    {index < text.split('\n').length - 1 && <br />}
+                </React.Fragment>
+            ))}
         </>
     );
 };

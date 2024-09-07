@@ -13,8 +13,7 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
     const [currentText, setCurrentText] = useState<string>('');
     const [isTyping, setIsTyping] = useState<boolean>(true);
 
-    // --- で区切るための文字列
-    const PAGE_BREAK = '---';
+    const PAGE_BREAK = '---'; // --- で区切るための文字列
 
     useEffect(() => {
         // 物語を "---" で分割し、各セクションをページに対応させる
@@ -74,10 +73,8 @@ const StoryDisplay: React.FC<StoryDisplayProps> = ({ story, onComplete, isStoryE
 
     return (
         <div className="story-display">
-            {/* currentTextを改行ごとに処理 */}
-            {currentText.split('\n').map((line, index) => (
-                <FormattedText key={index} text={line} />
-            ))}
+            {/* FormattedText コンポーネントに currentText をそのまま渡す */}
+            <FormattedText text={currentText} />
             <div className="pagination-buttons">
                 {page > 0 && <button onClick={prevPage} style={{ marginRight: 'auto' }}>戻る</button>}
                 {(page + 1 < displayedText.length || isTyping) && (
