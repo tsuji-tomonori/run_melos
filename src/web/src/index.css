@@ -31,7 +31,16 @@ button:hover {
     margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    white-space: pre-wrap;
+    line-height: 1.6;
 }
+
+.formatted-line {
+    text-indent: 1em;
+    margin: 0;
+}
+
 
 .memories {
     margin-bottom: 20px;

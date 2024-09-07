@@ -43,14 +43,13 @@ const FormattedText: React.FC<FormattedTextProps> = ({ text }) => {
         return parts;
     };
 
-    // 改行コード \n を <br /> に変換して、ルビ付きテキストと一緒に処理
+    // 各行を <p> タグでラップし、それぞれにインデントを適用
     return (
         <>
             {text.split('\n').map((line, index) => (
-                <React.Fragment key={index}>
+                <p key={index} className="formatted-line">
                     {convertRubyText(line)}
-                    {index < text.split('\n').length - 1 && <br />}
-                </React.Fragment>
+                </p>
             ))}
         </>
     );
