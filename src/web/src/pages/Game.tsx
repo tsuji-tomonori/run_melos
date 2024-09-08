@@ -5,6 +5,7 @@ import StoryDisplay from '../components/StoryDisplay';
 import MemoryButton from '../components/MemoryButton';
 import LoadingSpinner from '../components/LoadingSpinner';
 import HomeButton from '../components/HomeButton';
+import MemorySelectionPrompt from '../components/MemorySelectionPrompt';
 
 interface LocationState {
     story: string;
@@ -71,6 +72,7 @@ const Game: React.FC = () => {
             )}
             {!isStoryEnded && showMemoryButtons && storyCompleted && (
                 <div className="memories">
+                    <MemorySelectionPrompt /> {/* 記憶選択の文言を追加 */}
                     {Object.entries(memories).map(([index, memory]) => (
                         <MemoryButton
                             key={index}
