@@ -5,6 +5,7 @@ import tomllib
 from aws_cdk import Tags
 
 from src.cdk.stack.backend import BackendStack
+from src.cdk.stack.frontend import FrontEndStack
 
 
 def add_name_tag(scope):  # noqa: ANN001, ANN201
@@ -24,6 +25,14 @@ BackendStack(
     construct_id=f"{project.replace('_', '-')}",
     env=cdk.Environment(
         region="ap-northeast-1",
+    ),
+)
+
+FrontEndStack(
+    scope=app,
+    construct_id=f"{project.replace('_', '-')}-front",
+    env=cdk.Environment(
+        region="us-east-1",
     ),
 )
 

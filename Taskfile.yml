@@ -7,13 +7,21 @@ tasks:
   init:
     cmds:
       - pip install -r requirements-dev.txt
+  diff:
+    cmds:
+      - cdk diff
   deploy:
     cmds:
-      - cdk deploy
+      - cdk deploy --all
   web:
     dir: src/web
     cmds:
       - npm start
+  build:
+    dir: src/web
+    cmds:
+      - npm run build
+      - serve -s build
   mfa:
     cmds:
       - aws-mfa
