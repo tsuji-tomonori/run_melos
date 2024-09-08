@@ -46,7 +46,7 @@ const Game: React.FC = () => {
         setStoryCompleted(false); // 新しいストーリーを表示するので、完了状態をリセット
 
         try {
-            const data = await fetchStory(location.pathname.split('/')[2], selectedMemories, epochMs); // memoriesはnumber[]
+            const data = await fetchStory(location.pathname.split('/')[2], selectedMemories, epochMs);
             setStory(data.story);
             setMemories(data.memories);
             setSelectedMemories([]);

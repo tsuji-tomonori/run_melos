@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initGame } from '../services/api';
-import LoadingSpinner from '../components/LoadingSpinner'; // ローディング表示用コンポーネントをインポート
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const Home: React.FC = () => {
     const navigate = useNavigate();
@@ -13,7 +13,6 @@ const Home: React.FC = () => {
         setIsGameStarted(true); // ボタンの色を変えるためにステートを更新
         try {
             const data = await initGame();
-            // epoch_msもstateとして渡す
             navigate(`/game/${data.chat_id}`, { state: { story: data.story, memories: data.memories, epoch_ms: data.epoch_ms } });
         } finally {
             setIsLoading(false); // API呼び出し完了後にローディング表示を停止
