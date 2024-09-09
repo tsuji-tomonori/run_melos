@@ -8,5 +8,17 @@
 
 # アーキテクチャ
 
-![alt text](doc/アーキテクチャ.drawio.svg)
+![アーキテクチャ図](doc/design/architecture.drawio.svg)
 
+# 要件定義
+
+- [要件定義](doc/design/requirements_definition.md)
+
+# 詳細設計
+
+- [init](doc/design/detailed/init.md)
+- [story](doc/design/detailed/story.md)
+
+# 画面設計
+
+- [画面設計](doc/design/Screen/document.md)
