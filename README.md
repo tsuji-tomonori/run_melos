@@ -21,4 +21,4 @@
 
 # 画面設計
 
-- [画面設計](doc/design/Screen/document.md)
+- [画面設計](doc/design/screen/document.md)
