@@ -29,7 +29,6 @@ class DynamoDBConstruct(Construct):
             ),
             billing_mode=dynamdb.BillingMode.PAY_PER_REQUEST,
             removal_policy=cdk.RemovalPolicy.DESTROY,
-            time_to_live_attribute=TTL_KEY,
         )
 
         self.story_history = dynamdb.Table(
