@@ -22,3 +22,8 @@
 # 画面設計
 
 - [画面設計](doc/design/screen/document.md)
+
+# インフラ設計
+
+- [基本設計](doc/design/infra/base.md)
+- [パラメータ](doc/design/infra/paramater.md)
